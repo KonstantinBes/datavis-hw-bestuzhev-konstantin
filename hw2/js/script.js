@@ -105,6 +105,12 @@ loadData().then(data => {
         .attr('r', '10px')
         .attr('fill', 'grey')
         .exit().remove();
+
+        svg.selectAll('circle').data(data)
+        .attr('cx', d => x(+d[xParam][year]))
+        .attr('cy', d => y(+d[yParam][year]))
+        .attr('r', '10px')
+        .attr('fill', 'grey')
     }
 
     // рисуем график в первый раз
