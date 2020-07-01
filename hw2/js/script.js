@@ -107,14 +107,14 @@ loadData().then(data => {
         .attr('cx', d => x(+d[xParam][year]))
         .attr('cy', d => y(+d[yParam][year]))
         .attr('r', d => r(+d[radius][year]))
-        .attr('fill', d => color(d['region']))
+        .style('fill', d => color(d['region']))
         .exit().remove();
 
         svg.selectAll('circle').data(data)
         .attr('cx', d => x(+d[xParam][year]))
         .attr('cy', d => y(+d[yParam][year]))
         .attr('r', d => r(+d[radius][year]))
-        .attr('fill', d => color(d['region']));
+        .style('fill', d => color(d['region']));
     }
 
     // рисуем график в первый раз
