@@ -32,15 +32,13 @@ const yAxis = svg.append('g').attr('transform', `translate(${margin*2}, ${0})`);
 
 
 // Part 2: Здесь можно создать шкалы для цвета и радиуса объектов
-// const color = d3.scaleOrdinal()...
-// const r = d3.scaleSqrt()...
+const color = d3.scaleOrdinal().range(colors);
+const r = d3.scaleSqrt().range([5,20]);
 
 // Part 2: для элемента select надо задать options http://htmlbook.ru/html/select
 // и установить selected для дефолтного значения
 
-// d3.select('#radius').selectAll('option')
-//         ...
-
+//d3.select('#radius').selectAll('option');
 
 // Part 3: то же что делали выше, но для осей
 // ...
@@ -52,8 +50,10 @@ loadData().then(data => {
 
     // Part 2: здесь мы можем задать пораметр 'domain' для цветовой шкалы
     // для этого нам нужно получить все уникальные значения поля 'region', сделать это можно при помощи 'd3.nest'
-    //let regions = d3.nest()...
-    //color.domain(regions);
+    let regions = d3.nest().key(function (d) {
+        return d.region;
+}).entries(data);
+    color.domain(regions);
 
     // подписка на изменение позиции ползунка
     d3.select('.slider').on('change', newYear);
@@ -72,6 +72,8 @@ loadData().then(data => {
 
     function newRadius(){
         // Part 2: по аналогии с newYear
+        radius = this.value;
+        updateChart()
     }
     function updateChart(){
         // Обновляем все лейблы в соответствии с текущем состоянием
@@ -91,26 +93,28 @@ loadData().then(data => {
         let yRange = data.map(d=> +d[yParam][year]);
         y.domain([d3.min(yRange), d3.max(yRange)]);
 
-        yAxis.call(d3.axisLeft(y)); 
+        yAxis.call(d3.axisLeft(y));
         
         // Part 2: теперь у нас есть еще одна не постоянная шкала
-        // ...
+        let rRange = data.map(d=> +d[radius][year]);
+        r.domain([d3.min(rRange), d3.max(rRange)]);
 
-        // Part 1, 2: создаем и обновляем состояние точек        
+        // Part 1, 2: создаем и обновляем состояние точек
+
         svg.selectAll('circle').data(data)
         .enter()
         .append('circle')
         .attr('cx', d => x(+d[xParam][year]))
         .attr('cy', d => y(+d[yParam][year]))
-        .attr('r', '10px')
-        .attr('fill', 'grey')
+        .attr('r', d => r(+d[radius][year]))
+        .attr('fill', d => color(d['region']))
         .exit().remove();
 
         svg.selectAll('circle').data(data)
         .attr('cx', d => x(+d[xParam][year]))
         .attr('cy', d => y(+d[yParam][year]))
-        .attr('r', '10px')
-        .attr('fill', 'grey')
+        .attr('r', d => r(+d[radius][year]))
+        .attr('fill', d => color(d['region']));
     }
 
     // рисуем график в первый раз
