@@ -62,7 +62,8 @@ loadData().then(data => {
     d3.select('#radius').on('change', newRadius);
 
     // Part 3: подпишемся на изменения селектороы параметров осей
-    // ...
+    d3.select('#xAxle').on('change', newxParam);
+    d3.select('#yAxle').on('change', newyParam);
 
     // изменяем значение переменной и обновляем график
     function newYear(){
@@ -75,6 +76,17 @@ loadData().then(data => {
         radius = this.value;
         updateChart()
     }
+
+    function newxParam(){
+        xParam = this.value;
+        updateChart()
+    }
+
+    function newyParam(){
+        yParam = this.value;
+        updateChart()
+    }
+
     function updateChart(){
         // Обновляем все лейблы в соответствии с текущем состоянием
         xLable.text(xParam);
