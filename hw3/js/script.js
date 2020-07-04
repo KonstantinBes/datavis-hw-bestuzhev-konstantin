@@ -28,11 +28,8 @@ const donut_lable = d3.select('.donut-chart').append('text')
         .attr('transform', `translate(${(d_width/2)} ${d_height/2})`);
 
 const tooltip = d3.select('.tooltip');
-
-//  Part 1 - Создать симуляцию с использованием forceCenter(), forceX() и forceCollide()
-
-
-
+const name = tooltip.append('div').attr('class', 'title');
+const year = tooltip.append('div').attr('class', 'year');
 
 d3.csv('data/netflix.csv').then(data=>{
     data = d3.nest().key(d=>d.title).rollup(d=>d[0]).entries(data).map(d=>d.value).filter(d=>d['user rating score']!=='NA');
@@ -56,14 +53,12 @@ d3.csv('data/netflix.csv').then(data=>{
         .attr("class", "nodes")
         .attr('r', d => rScale(+d['user rating score']))
         .attr('fill', d => colorScale(d['rating']))
+        .attr('stroke', 'black')
     // добавляем обработчики событий mouseover и mouseout
         .on('mouseover', overBubble)
         .on('mouseout', outOfBubble);
 
-    
-    // Part 1 - передать данные в симуляцию и добавить обработчик события tick
-
-    
+    //  Part 1 - Создать симуляцию с использованием forceCenter(), forceX() и forceCollide()
     d3.forceSimulation()
     .nodes(data)
     .force("center", d3.forceCenter(b_width / 2, b_height / 2))
@@ -104,22 +99,23 @@ d3.csv('data/netflix.csv').then(data=>{
     function overBubble(d){
         console.log(d)
         // Part 2 - задать stroke и stroke-width для выделяемого элемента   
-        d3.select(this).attr('stroke', 'black');
-        d3.select(this).attr('stroke-width', 1);
+        d3.select(this).attr('stroke-width', 2);
         
         // Part 3 - обновить содержимое tooltip с использованием классов title и year
-        // ..
+        name.html(d['title']);
+        year.html(d['release year']);
 
         // Part 3 - изменить display и позицию tooltip
-        // ..
+        tooltip.style('display', 'block');
+        tooltip.style('left', d.x + 20 + 'px');
+        tooltip.style('top', d.y + 20 + 'px');
     }
     function outOfBubble(){
         // Part 2 - сбросить stroke и stroke-width
-        d3.select(this).attr('stroke', 'white');
         d3.select(this).attr('stroke-width', 0);
             
         // Part 3 - изменить display у tooltip
-        // ..
+        tooltip.style('display', 'none');
     }
 
     function overArc(d){
@@ -130,7 +126,10 @@ d3.csv('data/netflix.csv').then(data=>{
         d3.select(this).attr('opacity', .5);
 
         // Part 3 - изменить opacity, stroke и stroke-width для circles в зависимости от rating
-        // ..
+        bubble.selectAll('circle')
+            .data(data)
+            .attr('opacity', dd => dd['rating'] === d.data.key ? 1 : .2)
+            .attr('stroke-width', dd => dd['rating'] === d.data.key ? 2 : 0);
     }
     function outOfArc(){
         // Part 2 - изменить содержимое donut_lable
@@ -139,6 +138,9 @@ d3.csv('data/netflix.csv').then(data=>{
         d3.select(this).attr('opacity', 1);
 
         // Part 3 - вернуть opacity, stroke и stroke-width для circles
-        // ..
+        bubble.selectAll('circle')
+            .data(data)
+            .attr('opacity', 1)
+            .attr('stroke-width', 0);
     }
 });
