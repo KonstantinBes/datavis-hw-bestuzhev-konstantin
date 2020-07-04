@@ -9,7 +9,7 @@ const colors = [
     '#6a3d9a','#ffff99','#b15928']
 
 // Part 1: Создать шкалы для цвета, радиуса и позиции 
-const radius = d3.scaleLinear().range([.5, 20]);
+const radius = d3.scaleSqrt().range([4, 20]);
 const color = d3.scaleOrdinal().range(colors);
 const x = d3.scaleLinear().range([0, b_width]);
 
@@ -17,7 +17,6 @@ var bubble = d3.select('.bubble-chart')
     .attr('width', b_width).attr('height', b_height);
 
 var donut = d3.select('.donut-chart')
-    .append("svg")
       .attr("width", d_width)
       .attr("height", d_height)
     .append("g")
@@ -45,7 +44,7 @@ d3.csv('data/netflix.csv').then(data=>{
     
     
     // Part 1 - задать domain  для шкал цвета, радиуса и положения по x
-    const rScale = d3.scaleLinear().range([1, 15]).domain([d3.min(rating), d3.max(rating)])
+    const rScale = d3.scaleSqrt().range([3, 15]).domain([d3.min(rating), d3.max(rating)])
     const xScale = d3.scaleLinear().range([0, b_width]).domain([d3.min(years), d3.max(years)])
     const colorScale = d3.scaleOrdinal().range(colors).domain(ratings)
 
@@ -57,10 +56,9 @@ d3.csv('data/netflix.csv').then(data=>{
         .attr("class", "nodes")
         .attr('r', d => rScale(+d['user rating score']))
         .attr('fill', d => colorScale(d['rating']))
-
     // добавляем обработчики событий mouseover и mouseout
-            // .on('mouseover', overBubble)
-            // .on('mouseout', outOfBubble);
+        .on('mouseover', overBubble)
+        .on('mouseout', outOfBubble);
 
     
     // Part 1 - передать данные в симуляцию и добавить обработчик события tick
@@ -99,15 +97,15 @@ d3.csv('data/netflix.csv').then(data=>{
         .attr('stroke', 'black')
         .attr('stroke-width', 2)
         .attr('fill', d => colorScale(d.data.key))
-
     // добавляем обработчики событий mouseover и mouseout
-        //.on('mouseover', overArc)
-        //.on('mouseout', outOfArc);
+        .on('mouseover', overArc)
+        .on('mouseout', outOfArc);
 
     function overBubble(d){
         console.log(d)
         // Part 2 - задать stroke и stroke-width для выделяемого элемента   
-        // ..
+        d3.select(this).attr('stroke', 'black');
+        d3.select(this).attr('stroke-width', 1);
         
         // Part 3 - обновить содержимое tooltip с использованием классов title и year
         // ..
@@ -117,7 +115,8 @@ d3.csv('data/netflix.csv').then(data=>{
     }
     function outOfBubble(){
         // Part 2 - сбросить stroke и stroke-width
-        // ..
+        d3.select(this).attr('stroke', 'white');
+        d3.select(this).attr('stroke-width', 0);
             
         // Part 3 - изменить display у tooltip
         // ..
@@ -126,18 +125,18 @@ d3.csv('data/netflix.csv').then(data=>{
     function overArc(d){
         console.log(d)
         // Part 2 - изменить содержимое donut_lable
-        // ..
+        donut_lable.html(d.data.key);
         // Part 2 - изменить opacity арки
-        // ..
+        d3.select(this).attr('opacity', .5);
 
         // Part 3 - изменить opacity, stroke и stroke-width для circles в зависимости от rating
         // ..
     }
     function outOfArc(){
         // Part 2 - изменить содержимое donut_lable
-        // ..
+        donut_lable.html('');
         // Part 2 - изменить opacity арки
-        // ..
+        d3.select(this).attr('opacity', 1);
 
         // Part 3 - вернуть opacity, stroke и stroke-width для circles
         // ..
