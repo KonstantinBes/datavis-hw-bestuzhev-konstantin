@@ -42,9 +42,12 @@
                 const years = Object.keys(data[0][param]).map(d=>+d).filter(d=>d);
 
                 // TODO Part 2: тут можно создать шкалы х и y
-                // ...
-                //const x = d3.scaleBand(years, [0, width]).padding(.1);
-                // y = d3.scaleLinear().range([sliderHeight, 0]);
+                // Initialize the X axis                
+                const x = d3.scaleBand(years, [0, width + 280]).padding(.1);
+
+                // Initialize the Y axis
+                const y = d3.scaleLinear().range([sliderHeight, 0]);
+                var yAxis = svg.append("g")
                 
                 // TODO Part 3: тут можно создать svg внутри #menu и добавить туда легенду
                 // ...
@@ -95,8 +98,8 @@
                 range.append('g').call(slider);
                 
                 // убираем лишние элементы и делаем кастюмный thumb
-                //d3.select('g.slider').selectAll('line').remove();
-                //d3.select('g.parameter-value path').attr('d', `M 0,0 V ${sliderHeight} H -${x.bandwidth()} V 0 Z`);
+                d3.select('g.slider').selectAll('line').remove();
+                d3.select('g.parameter-value path').attr('d', `M 0,0 V ${sliderHeight} H -${x.bandwidth()} V 0 Z`);
 
                 // TODO Part 1: тут можно создать проекцию d3.geoEquirectangular() и подстроить ее под размеры экрана, а также
                 // создать генератор пути
@@ -134,6 +137,7 @@
                     map.attr('fill', feature =>{
                         // находим страну в наборе данных
                         let country = data.find(d=>d.geo === feature.id.toLowerCase());
+
                         // TODO Part 1: задать цвет страны в зависимости от выбранных параметров
                         if (country === undefined) {
                             return noColor;
@@ -143,11 +147,38 @@
 
                     // берем набор значений нужного показателя для каждого из годов для барчарта
                     let array = years.map(y=>d3.sum(data.map(d=>+d[param][y])));
+                    //console.log(array);
+
                     // TODO Part 2: обновить домен шкалы y
-                    // ...
+                    y.domain([0, d3.max(array, function(d) { return d}) ]);
+                    yAxis.transition().duration(duration).call(d3.axisLeft(y));
 
                     // TODO Part 2: реализовать создание и добавление барчарта
-                    // ...
+                    var bar = chart.selectAll("rect")
+                        .data(array)
+                    bar
+                        .enter()
+                        .append("rect") // Add a new rect for each new elements
+                        .merge(bar) // get the already existing elements as well
+                        .transition() // and apply changes to all of them
+                        .duration(duration)
+                        .attr("y",  function(d) {
+                            return y(d);
+                        })
+                        .attr("width", x.bandwidth())
+                        .attr("height", function(d) {
+                            return sliderHeight - y(d);
+                        })
+                        .attr("fill", "#69b3a2")
+                        // translate используется для сдвига по оси x
+                        .attr("transform", function (d, i) {
+                            var translate = [x.bandwidth() * i, 0];
+                            return "translate("+ translate +")";
+                        });
+                    // If less group in the new dataset, delete the ones that not in use anymore
+                    bar
+                        .exit()
+                        .remove()
 
                     
                     // TODO Part 3: обновляем шкалу в легенде на основе выбранных параметров
